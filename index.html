@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BreakaTrade | Signals</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        trade: {
+                            up: '#059669', // Emerald 600
+                            down: '#DC2626' // Red 600
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-black font-sans h-screen overflow-hidden flex flex-col antialiased selection:bg-black selection:text-white">
+
+    <!-- Header -->
+    <header class="h-16 liquid-panel border-b border-white/40 flex items-center justify-between px-6 shrink-0 animate-fade-in-up m-4 mb-2 z-10">
+        <div class="flex items-center gap-3">
+            <h1 class="font-semibold text-lg tracking-tight text-black flex items-center gap-2">
+                BreakaTrade
+            </h1>
+        </div>
+
+        <!-- Global Stats -->
+        <div class="hidden sm:flex items-center gap-3 bg-gray-50 px-4 py-1.5 rounded-full border border-gray-200">
+            <div class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span id="ws-indicator" class="relative inline-flex rounded-full h-2 w-2 bg-trade-up"></span>
+            </div>
+            <div class="text-[10px] font-semibold text-gray-600 uppercase tracking-wider" id="ws-status">Connecting...</div>
+            <div class="h-3 w-px bg-gray-300 mx-1"></div>
+            <div class="text-[10px] font-mono text-gray-500"><span id="scanned-count" class="font-bold text-black">0</span> Pairs</div>
+            <div class="h-3 w-px bg-gray-300 mx-1"></div>
+            <div class="text-[10px] font-mono text-gray-500">BTC <span id="btc-price" class="font-bold text-black">$0</span></div>
+        </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex overflow-hidden p-4 pt-0 gap-4">
+        
+        <!-- Sidebar Settings -->
+        <aside class="w-72 liquid-panel p-6 flex flex-col gap-8 overflow-y-auto hidden lg:flex shrink-0 animate-fade-in-up">
+            <div>
+                <h2 class="font-semibold text-sm text-black mb-5 uppercase tracking-wide">Configuration</h2>
+                
+                <!-- Trading Mode Toggle -->
+                <div class="mb-6">
+                    <label class="text-sm text-gray-600 mb-2 block">Trading Style</label>
+                    <div class="flex bg-gray-100 p-1 rounded-lg relative">
+                        <div id="mode-slider" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-white rounded-md shadow-sm transition-transform duration-300 ease-out" style="transform: translateX(0);"></div>
+                        <button id="mode-scalp" class="flex-1 text-xs font-semibold py-1.5 relative z-10 text-black transition-colors flex items-center justify-center gap-1.5" onclick="setTradingMode('scalp')">
+                            Scalp (Quick)
+                            <span id="dot-scalp" class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse hidden"></span>
+                        </button>
+                        <button id="mode-swing" class="flex-1 text-xs font-semibold py-1.5 relative z-10 text-gray-500 transition-colors flex items-center justify-center gap-1.5" onclick="setTradingMode('swing')">
+                            Swing (30%+)
+                            <span id="dot-swing" class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse hidden"></span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Sensitivity -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm text-gray-600">Sensitivity</label>
+                            <span class="text-xs font-mono text-black bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200" id="sensitivity-val">High</span>
+                        </div>
+                        <div class="relative pt-2 pb-4">
+                            <!-- Background Track with Dots -->
+                            <div class="absolute top-3.5 left-0 right-0 h-1 bg-gray-200 rounded-full z-0 pointer-events-none"></div>
+                            <div class="absolute top-3.5 left-0 right-0 flex justify-between z-0 pointer-events-none px-1">
+                                <div class="w-2.5 h-2.5 bg-gray-300 rounded-full -mt-[3px] sensitivity-dot transition-colors duration-200" id="dot-1"></div>
+                                <div class="w-2.5 h-2.5 bg-gray-300 rounded-full -mt-[3px] sensitivity-dot transition-colors duration-200" id="dot-2"></div>
+                                <div class="w-2.5 h-2.5 bg-black rounded-full -mt-[3px] sensitivity-dot transition-colors duration-200" id="dot-3"></div>
+                            </div>
+                            
+                            <!-- Invisible Input overlaying the track -->
+                            <input type="range" id="sensitivity" min="1" max="3" value="3" step="1" class="w-full relative z-10 cursor-pointer opacity-0 h-4">
+                            
+                            <!-- Custom Thumb -->
+                            <div id="sensitivity-thumb" class="absolute top-1 w-5 h-5 bg-black rounded-full shadow-md pointer-events-none transition-all duration-200" style="left: 100%; transform: translateX(-100%);"></div>
+                            
+                            <!-- Labels -->
+                            <div class="absolute top-7 left-0 right-0 flex justify-between text-[10px] text-gray-500 font-medium px-0">
+                                <span class="cursor-pointer hover:text-black transition-colors" onclick="document.getElementById('sensitivity').value=1; document.getElementById('sensitivity').dispatchEvent(new Event('input'))">Low</span>
+                                <span class="cursor-pointer hover:text-black transition-colors" onclick="document.getElementById('sensitivity').value=2; document.getElementById('sensitivity').dispatchEvent(new Event('input'))">Med</span>
+                                <span class="cursor-pointer hover:text-black transition-colors" onclick="document.getElementById('sensitivity').value=3; document.getElementById('sensitivity').dispatchEvent(new Event('input'))">High</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Volume Filter -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-sm text-gray-600">Min 24h Volume</label>
+                            <span class="text-xs font-mono text-black" id="volume-val">$10M</span>
+                        </div>
+                        <select id="volume-filter" class="w-full bg-white/50 border border-white/60 text-sm rounded-xl focus:ring-1 focus:ring-black focus:border-black block p-2 text-black outline-none cursor-pointer backdrop-blur-md shadow-sm">
+                            <option value="5000000">$5M USDT</option>
+                            <option value="10000000" selected>$10M USDT</option>
+                            <option value="50000000">$50M USDT</option>
+                            <option value="100000000">$100M USDT</option>
+                        </select>
+                    </div>
+
+                    <hr class="border-gray-200">
+
+                    <!-- Notifications -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm text-gray-600">Audio Alerts</label>
+                        <div class="theme-switch-wrapper">
+                            <label class="toggle-switch">
+                                <input type="checkbox" class="toggle-input" id="audio-toggle" checked>
+                                <div class="slider-track"></div>
+                                <div class="slider-knob">
+                                    <div class="magnifying-content"></div>
+                                    <div class="distortion-lens"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <label class="text-sm text-gray-600">Desktop Alerts</label>
+                        <div class="theme-switch-wrapper">
+                            <label class="toggle-switch">
+                                <input type="checkbox" class="toggle-input" id="desktop-toggle">
+                                <div class="slider-track"></div>
+                                <div class="slider-knob">
+                                    <div class="magnifying-content"></div>
+                                    <div class="distortion-lens"></div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Feed -->
+        <section class="flex-1 liquid-panel flex flex-col p-8 gap-6 overflow-hidden animate-fade-in-up delay-100">
+            
+            <div class="flex items-center justify-between border-b border-black/10 pb-4 shrink-0">
+                <h2 class="font-semibold text-xl text-black">Signals</h2>
+                <button id="clear-signals" class="px-4 py-2 rounded bg-black text-white text-sm hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-eraser text-xs"></i> Clear Feed
+                </button>
+            </div>
+
+            <!-- Signal Feed (Scalp) -->
+            <div id="scalp-signals-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pb-10">
+                <div id="scalp-empty-state" class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-bolt text-3xl mb-4 text-gray-300"></i>
+                    <p class="text-sm font-medium text-black">Awaiting Scalp Signals</p>
+                    <p class="text-xs mt-1 text-gray-500 text-center max-w-xs">Scanning for quick momentum jumps.</p>
+                </div>
+            </div>
+            
+            <!-- Signal Feed (Swing) -->
+            <div id="swing-signals-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pb-10 hidden">
+                <div id="swing-empty-state" class="h-full flex flex-col items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-mountain text-3xl mb-4 text-gray-300"></i>
+                    <p class="text-sm font-medium text-black">Awaiting Swing Signals</p>
+                    <p class="text-xs mt-1 text-gray-500 text-center max-w-xs">Scanning for massive 30%+ daily runners.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right Sidebar (Movers) -->
+        <aside class="w-80 liquid-panel p-6 flex flex-col gap-6 overflow-y-auto hidden xl:flex shrink-0 animate-fade-in-up delay-200">
+            <h2 class="font-semibold text-sm text-black uppercase tracking-wide">Top Movers</h2>
+            
+            <div class="flex flex-col gap-2" id="movers-container">
+                <!-- Skeleton Loading -->
+                <div class="animate-pulse flex items-center justify-between p-3 rounded border border-gray-200 bg-white">
+                    <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                </div>
+                <div class="animate-pulse flex items-center justify-between p-3 rounded border border-gray-200 bg-white">
+                    <div class="h-4 bg-gray-200 rounded w-1/3"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>
+        </aside>
+
+
+    </main>
+
+    <!-- Chart Modal -->
+    <div id="chart-modal" class="fixed inset-0 bg-white/20 backdrop-blur-md z-50 hidden flex items-center justify-center p-6">
+        <div class="liquid-panel w-full max-w-6xl h-[80vh] flex flex-col overflow-hidden modal-animate border border-white/60 shadow-2xl">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-4 border-b border-white/40 bg-white/30 shrink-0">
+                <div class="flex items-center gap-3">
+                    <h2 class="font-semibold text-lg text-black" id="modal-title">BTCUSDT</h2>
+                    <span class="text-xs font-mono bg-black text-white px-2 py-0.5 rounded hidden sm:block">Live Chart</span>
+                </div>
+                
+                <!-- Custom Time Intervals -->
+                <div class="flex items-center gap-1 bg-gray-100 p-1 rounded-lg" id="chart-intervals">
+                    <button class="interval-btn active px-2.5 py-1 text-xs font-medium rounded-md bg-white shadow-sm text-black transition-all" data-interval="1">1m</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="5">5m</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="15">15m</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="30">30m</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="60">1h</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="240">4h</button>
+                    <button class="interval-btn px-2.5 py-1 text-xs font-medium rounded-md text-gray-500 hover:text-black transition-all" data-interval="D">1D</button>
+                </div>
+
+                <button id="close-modal" class="text-gray-500 hover:text-black transition-colors ml-2">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <!-- Chart Container -->
+            <div class="flex-1 w-full relative bg-white" id="tv_chart_container">
+                <div class="absolute inset-0 flex items-center justify-center text-gray-400">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="alert-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+
+    <!-- SVG Filters for Liquid Glass Toggle -->
+    <svg style="position: absolute; width: 0; height: 0;" class="svg-filters">
+        <defs>
+            <filter id="toggler-distortion">
+                <feTurbulence 
+                    type="fractalNoise" 
+                    baseFrequency="0.01 0.04" 
+                    numOctaves="5" 
+                    seed="2" 
+                    result="turbulence"/>
+                <feDisplacementMap 
+                    in="SourceGraphic" 
+                    in2="turbulence" 
+                    scale="30"
+                    xChannelSelector="R" 
+                    yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <!-- TradingView Script -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

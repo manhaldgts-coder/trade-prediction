@@ -1,0 +1,428 @@
+/* Minimal CSS */
+
+body {
+    /* Apple Liquid Mesh Gradient Background */
+    background: radial-gradient(at 0% 0%, rgba(240, 244, 255, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(224, 232, 255, 1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(249, 240, 255, 1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(230, 245, 255, 1) 0px, transparent 50%),
+                linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+    background-size: 200% 200%;
+    animation: fluid-mesh 15s ease infinite;
+    background-attachment: fixed;
+}
+
+@keyframes fluid-mesh {
+    0% { background-position: 0% 0%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+    100% { background-position: 0% 0%; }
+}
+
+/* iOS 26 Liquid Glass Panels */
+.liquid-panel {
+    background: rgba(255, 255, 255, 0.45) !important;
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+    border-radius: 28px !important;
+}
+
+/* iOS 26 Liquid Glass Cards */
+.liquid-card {
+    background: rgba(255, 255, 255, 0.5) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.liquid-card:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 1);
+    border-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Hide All Scrollbars */
+::-webkit-scrollbar {
+    display: none;
+    width: 0;
+}
+
+* {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Signal Card Animations */
+@keyframes smoothSlideDown {
+    0% { opacity: 0; transform: translateY(-15px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.signal-card-new {
+    animation: smoothSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Modal Animation */
+@keyframes modalScaleIn {
+    from { opacity: 0; transform: scale(0.97) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-animate {
+    animation: modalScaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Page Load Animation */
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    opacity: 0;
+}
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+
+/* Value Update Animations */
+@keyframes flashGreen {
+    0% { color: #059669; }
+    100% { color: inherit; }
+}
+
+@keyframes flashRed {
+    0% { color: #DC2626; }
+    100% { color: inherit; }
+}
+
+.update-up { animation: flashGreen 0.8s ease-out; }
+.update-down { animation: flashRed 0.8s ease-out; }
+
+/* Mover Item */
+.mover-item {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s, box-shadow 0.2s;
+}
+.mover-item:hover {
+    transform: translateX(-4px);
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
+}
+
+/* Range Slider Styling */
+input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+}
+
+/* --- START: Advanced Theme Toggle CSS --- */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transform-style: preserve-3d;
+}
+
+.toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider-track {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #e5e7eb;
+    border-radius: 15px;
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease calc(0.6s * 0.9);
+}
+
+.toggle-input:checked + .slider-track {
+    background-color: #000000;
+    transition-delay: calc(0.6s * 0.9);
+}
+
+.slider-knob {
+    position: absolute;
+    z-index: 2;
+    height: 18px;
+    width: 25.2px;
+    left: 4.8px;
+    bottom: 6px;
+    background-color: #ffffff;
+    border-radius: 9px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+    will-change: transform, background;
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.87, 0, 0.13, 1);
+    overflow: hidden;
+}
+
+.slider-knob .distortion-lens {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: url(#toggler-distortion);
+    opacity: 0;
+    will-change: opacity;
+    z-index: 2;
+}
+
+.magnifying-content {
+    position: absolute;
+    width: 60px;
+    height: 30px;
+    top: -6px;
+    left: -4.8px;
+    background-color: #e5e7eb;
+    border-radius: 15px;
+    box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    will-change: transform, opacity;
+    z-index: 1;
+}
+
+.toggle-input:checked ~ .slider-knob .magnifying-content {
+    background-color: #000000;
+    transition: background-color 0.2s ease calc(0.6s * 0.9);
+}
+
+.toggle-input:checked ~ .slider-knob {
+    transform: translateX(25.2px);
+}
+
+.animate-on {
+    animation: morph-to-lens-on 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+.animate-off {
+    animation: morph-to-lens-off 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+.animate-on .magnifying-content,
+.animate-on .distortion-lens {
+    animation: magnify-on 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+.animate-off .magnifying-content,
+.animate-off .distortion-lens {
+    animation: magnify-off 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+.magnifying-content.animate-on {
+    animation: magnify-translate-on 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+.magnifying-content.animate-off {
+    animation: magnify-translate-off 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards;
+}
+
+@keyframes morph-to-lens-on {
+    0% {
+        transform: translateX(0) scale(1) translateZ(0);
+        background: #ffffff;
+    }
+
+    15% {
+        transform: translateX(0) scale(1.1) translateZ(10px);
+        background: transparent;
+    }
+
+    50% {
+        transform: translateX(12.6px) scale(3) translateZ(50px);
+        background: transparent;
+    }
+
+    85% {
+        transform: translateX(25.2px) scale(1.1) translateZ(10px);
+        background: transparent;
+    }
+
+    100% {
+        transform: translateX(25.2px) scale(1) translateZ(0);
+        background: #ffffff;
+    }
+}
+
+@keyframes magnify-on {
+    0%,
+    14.9%,
+    85.1%,
+    100% {
+        opacity: 0;
+    }
+
+    15%,
+    85% {
+        opacity: 1;
+    }
+}
+
+@keyframes magnify-translate-on {
+    0%,
+    14.9%,
+    85.1%,
+    100% {
+        transform: scale(1) translateX(0);
+    }
+
+    15% {
+        transform: scale(1.2) translateX(0);
+    }
+
+    50% {
+        transform: scale(1.2) translateX(-10.5px);
+    }
+
+    85% {
+        transform: scale(1.2) translateX(-21px);
+    }
+}
+
+@keyframes morph-to-lens-off {
+    0% {
+        transform: translateX(25.2px) scale(1) translateZ(0);
+        background: #ffffff;
+    }
+
+    20% {
+        transform: translateX(25.2px) scale(1) translateZ(0);
+        background: transparent;
+    }
+
+    40% {
+        transform: translateX(25.2px) scale(3) translateZ(50px);
+        background: transparent;
+    }
+
+    60% {
+        transform: translateX(0) scale(3) translateZ(50px);
+        background: transparent;
+    }
+
+    80% {
+        transform: translateX(0) scale(1) translateZ(0);
+        background: transparent;
+    }
+
+    100% {
+        transform: translateX(0) scale(1) translateZ(0);
+        background: #ffffff;
+    }
+}
+
+@keyframes magnify-off {
+    0%,
+    19.9%,
+    80.1%,
+    100% {
+        opacity: 0;
+    }
+
+    20%,
+    80% {
+        opacity: 1;
+    }
+}
+
+@keyframes magnify-translate-off {
+    0%,
+    19.9% {
+        transform: scale(1) translateX(-25.2px);
+    }
+
+    20% {
+        transform: scale(1.2) translateX(-21px);
+    }
+
+    40% {
+        transform: scale(1.2) translateX(-21px);
+    }
+
+    60% {
+        transform: scale(1.2) translateX(0);
+    }
+
+    80% {
+        transform: scale(1.2) translateX(0);
+    }
+
+    80.1%,
+    100% {
+        transform: scale(1) translateX(0);
+    }
+}
+/* --- END: Advanced Theme Toggle CSS --- */
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #000000;
+    cursor: pointer;
+    margin-top: -6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+input[type=range]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: #e5e7eb;
+    border-radius: 2px;
+}
+
+/* Scroll Bounce Animations */
+@keyframes endScrollBounce {
+    0% { transform: translateY(0) translateZ(0); }
+    20% { transform: translateY(-20px) translateZ(0); }
+    50% { transform: translateY(4px) translateZ(0); }
+    75% { transform: translateY(-2px) translateZ(0); }
+    100% { transform: translateY(0) translateZ(0); }
+}
+
+@keyframes topScrollBounce {
+    0% { transform: translateY(0) translateZ(0); }
+    20% { transform: translateY(20px) translateZ(0); }
+    50% { transform: translateY(-4px) translateZ(0); }
+    75% { transform: translateY(2px) translateZ(0); }
+    100% { transform: translateY(0) translateZ(0); }
+}
+
+.bounce-bottom {
+    animation: endScrollBounce 0.5s ease-out forwards;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.bounce-top {
+    animation: topScrollBounce 0.5s ease-out forwards;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
